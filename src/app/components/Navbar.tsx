@@ -47,7 +47,12 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-
+              <Link
+  href="/my-registrations"
+  className="rounded-lg border px-4 py-2 text-sm"
+>
+  My Registrations
+</Link>
               <Link
                     href="/admin"
                     className="rounded-lg border px-4 py-2 text-sm"
