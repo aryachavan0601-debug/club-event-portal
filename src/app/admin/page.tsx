@@ -19,7 +19,7 @@ type Registration = {
 export default function AdminPage() {
   const supabase = createClient();
   const router = useRouter();
-
+  const [registrationCount, setRegistrationCount] = useState(0);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -64,9 +64,9 @@ export default function AdminPage() {
         .order("registered_at", { ascending: false });
 
       if (!error && data) {
-        setRegistrations(data as unknown as Registration[]);
-      }
-
+  setRegistrations(data as unknown as Registration[]);
+  setRegistrationCount(data.length);
+}
       setLoading(false);
     }
 
@@ -88,10 +88,12 @@ export default function AdminPage() {
           Admin Dashboard
         </h1>
 
-        <p className="mb-8 text-gray-600">
-          View all event registrations.
-        </p>
-
+        <div className="mb-8 rounded-xl bg-white p-6 shadow">
+  <p className="text-sm text-gray-500">Total Registrations</p>
+  <p className="mt-2 text-3xl font-bold">
+    {registrationCount}
+  </p>
+</div>
         <div className="overflow-x-auto rounded-xl bg-white shadow">
           <table className="w-full">
             <thead className="border-b bg-gray-50">
