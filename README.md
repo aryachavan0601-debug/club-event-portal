@@ -1,102 +1,221 @@
 # Club Event Portal
 
-A full-stack web application that allows students to discover upcoming club events, create accounts, log in, and register for events.
+A full-stack web application for students to discover upcoming college club events, create an account, and register for events.
+
+The project demonstrates a modern full-stack architecture using Next.js and Supabase, with authentication, database integration, event registration, duplicate-registration prevention, and role-based admin access.
+
+---
+
+## Project Overview
+
+The Club Event Portal provides a centralized platform where students can discover and register for upcoming club events.
+
+Students can:
+
+- Create an account
+- Log in and log out
+- Browse upcoming events
+- View detailed event information
+- Register for events
+- View their registered events
+
+Administrators can access a protected admin dashboard to view event registrations.
+
+---
 
 ## Features
 
+### Student Features
+
 - View upcoming club events
-- User signup and login using Supabase Authentication
-- Logout functionality
-- Event detail pages
-- Authenticated event registration
-- Prevention of duplicate registrations
+- View detailed event information
+- Create an account using email and password
+- Login using Supabase Authentication
+- Logout
+- Register for events
+- Prevent unauthenticated users from registering
+- Prevent duplicate registrations
+- View personal event registrations
+- Responsive user interface
+
+### Admin Features
+
 - Protected admin dashboard
 - Role-based admin access
-- Admin view of event registrations
-- Responsive UI
+- View event registration information
+- Restrict admin functionality to authorized users
+
+---
 
 ## Tech Stack
+
+### Frontend
 
 - Next.js
 - React
 - TypeScript
 - Tailwind CSS
+
+### Backend / Services
+
 - Supabase
-  - Authentication
+  - Supabase Authentication
   - PostgreSQL Database
+  - Row Level Security / database-level access control
+
+### Deployment
+
+- Vercel
+
+### Development
+
+- Git
+- GitHub
+- VS Code
+
+---
 
 ## Database Structure
 
-### profiles
+The application uses a PostgreSQL database through Supabase.
 
-Stores additional information about users.
+### `profiles`
 
-- `id`
-- `full_name`
-- `role`
+Stores additional information associated with users.
+
+| Column | Description |
+|---|---|
+| `id` | User ID linked to the authenticated user |
+| `full_name` | User's name |
+| `role` | User's application role |
 
 Roles:
+
 - `student`
 - `admin`
 
-### events
+---
 
-Stores club event information.
+### `events`
 
-- `id`
-- `title`
-- `description`
-- `event_date`
-- `location`
+Stores information about club events.
 
-### registrations
+| Column | Description |
+|---|---|
+| `id` | Unique event ID |
+| `title` | Event title |
+| `description` | Event description |
+| `event_date` | Date and time of the event |
+| `location` | Event location |
+
+---
+
+### `registrations`
 
 Stores event registrations.
 
-- `id`
-- `user_id`
-- `event_id`
-- `registered_at`
+| Column | Description |
+|---|---|
+| `id` | Unique registration ID |
+| `user_id` | ID of the registered user |
+| `event_id` | ID of the registered event |
+| `registered_at` | Registration timestamp |
 
-A unique constraint prevents the same user from registering for the same event multiple times.
+A database-level unique constraint prevents the same user from registering for the same event multiple times.
+
+---
+
 
 ## Application Flow
 
-### Student
+### Student Flow
 
-Signup → Login → Browse Events → View Event → Register
+Signup → Login → Browse Events → View Event → Register → My Registrations
 
-### Admin
+### Admin Flow
 
-Login → Admin Dashboard → View Registrations
+Login → Admin Dashboard → View Event Registrations
 
-## Setup
+## Authentication & Access Control
 
-1. Clone the repository.
+- User authentication is handled using Supabase Authentication.
+- Users must be logged in to register for events.
+- Unauthenticated users are redirected to the login page when attempting to register.
+- Users can view their registered events through the My Registrations page.
+- Admin functionality is restricted to authorized admin users.
+- Duplicate registrations for the same event are prevented at the database level.
+- Environment variables containing project configuration are excluded from Git.
 
-2. Install dependencies:
+## Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/aryachavan0601-debug/club-event-portal.git
+cd club-event-portal
+
+### 2. Install dependencies
 
 ```bash
 npm install
 
-3. Create .env.local:
+### 3. Configure environment variables
+
+Create a `.env.local` file in the project root:
+
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 
-4. Start the development server:
+Add the corresponding values from your Supabase project.
+
+### 4. Start the development server
+
 npm run dev
+
+```Open:
+[http://localhost:3000](http://localhost:3000)
+
 Open:
-http://localhost:3000
 
-Security:
-Authentication is handled through Supabase Auth.
-Event registration requires an authenticated user.
-Admin access is restricted based on the user's role.
-Duplicate registrations are prevented at the database level.
-Environment variables are excluded from Git using .gitignore.
+[http://localhost:3000](http://localhost:3000)
 
-External References:
-No external UI template was directly copied. The interface was implemented using Tailwind CSS with AI-assisted development guidance.
+---
 
+## External References
 
+No external UI template was directly copied.
+
+The interface was implemented using Next.js and Tailwind CSS, with AI-assisted development guidance used for learning, debugging, implementation guidance, and UI development.
+
+---
+
+## GitHub Repository
+
+[https://github.com/aryachavan0601-debug/club-event-portal](https://github.com/aryachavan0601-debug/club-event-portal)
+
+---
+
+## Live Deployment
+
+The application is deployed using Vercel.
+
+**Live URL:** To be added after deployment.
+
+---
+
+## Test Account
+
+A test account will be provided for evaluating the deployed application.
+
+### Student Account
+
+Email: To be added  
+Password: To be added
+
+### Admin Account
+
+Email: To be added  
+Password: To be added
+
+> Test credentials will be added before final submission.
 
