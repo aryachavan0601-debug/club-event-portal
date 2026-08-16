@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
   const supabase = createClient();
   const router = useRouter();
-
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +19,11 @@ export default function SignupPage() {
     setLoading(true);
     setMessage("");
 
+    if (password !== confirmPassword) {
+  setMessage("Passwords do not match.");
+  setLoading(false);
+  return;
+}
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -81,6 +86,15 @@ export default function SignupPage() {
             className="w-full rounded-lg border p-3"
           />
 
+            <input
+  type="password"
+  placeholder="Confirm Password"
+  value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
+  required
+  minLength={6}
+  className="w-full rounded-lg border p-3"
+/>
           <button
             type="submit"
             disabled={loading}
