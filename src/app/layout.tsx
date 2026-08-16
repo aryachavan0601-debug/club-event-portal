@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import Navbar from "./components/Navbar";
 
-export const metadata: Metadata = {
-  title: "Club Event Portal",
-  description: "Discover and register for upcoming club events",
+export const metadata = {
+  title: "DJSCE Club Events",
+  description: "Discover and register for upcoming DJSCE club events",
 };
 
 export default function RootLayout({
@@ -13,7 +13,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

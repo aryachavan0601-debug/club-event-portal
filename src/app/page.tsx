@@ -1,72 +1,164 @@
-import Navbar from "./components/Navbar";
+import Link from "next/link";
 import { createClient } from "../lib/supabase/client";
+
+type Event = {
+  id: number;
+  title: string;
+  description: string;
+  event_date: string;
+};
 
 export default async function Home() {
   const supabase = createClient();
 
-  const { data: events, error } = await supabase
+  const { data } = await supabase
     .from("events")
-    .select("*")
-    .order("event_date", { ascending: true });
+    .select("id, title, description, event_date")
+    .order("event_date", { ascending: true })
+    .limit(3);
 
-  if (error) {
-    return (
-      <main className="p-8">
-        <h1 className="text-2xl font-bold">Unable to load events</h1>
-        <p className="mt-2 text-red-600">{error.message}</p>
-      </main>
-    );
-  }
+  const events: Event[] = data || [];
 
   return (
-  <main className="min-h-screen bg-gray-100">
-    <Navbar />
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-10">
-          <h1 className="text-4xl font-bold">Club Event Portal</h1>
-          <p className="mt-2 text-gray-600">
-            Discover upcoming events and register to participate.
-          </p>
-        </header>
+    <main className="home-container">
+
+      <section className="hero">
+
+        <div className="hero-badge">
+          DJSCE STUDENT COMMUNITY
+        </div>
+
+        <h1>
+          Discover. Connect. <span>Experience.</span>
+        </h1>
+
+        <p>
+          Discover upcoming college events, connect with student
+          clubs, and register for experiences that matter to you.
+        </p>
+
+        <div className="hero-actions">
+          <Link href="/events" className="primary-btn">
+            Explore Events →
+          </Link>
+
+          <Link
+            href="/my-registrations"
+            className="secondary-btn"
+          >
+            My Registrations
+          </Link>
+        </div>
+
+      </section>
+
+      <section className="stats">
+
+        <div className="stat-card">
+          <div className="stat-number">
+            {events.length}+
+          </div>
+          <div className="stat-label">
+            Upcoming Events
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-number">
+            8+
+          </div>
+          <div className="stat-label">
+            Student Clubs
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-number">
+            24/7
+          </div>
+          <div className="stat-label">
+            Easy Access
+          </div>
+        </div>
+
+      </section>
+
+      <section>
+
+        <div className="section-header">
+
+          <div>
+            <p className="section-label">
+              WHAT'S HAPPENING
+            </p>
+
+            <h2>
+              Upcoming Events
+            </h2>
+          </div>
+
+          <Link
+            href="/events"
+            className="secondary-btn"
+          >
+            View All →
+          </Link>
+
+        </div>
 
         {events.length === 0 ? (
-          <p>No upcoming events found.</p>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                className="rounded-2xl bg-white p-6 shadow-md"
-              >
-                <h2 className="text-xl font-bold">{event.title}</h2>
 
-                <p className="mt-3 text-gray-600">
+          <div className="empty-state">
+            No upcoming events available.
+          </div>
+
+        ) : (
+
+          <div className="events-grid">
+
+            {events.map((event) => (
+
+              <article
+                className="event-card"
+                key={event.id}
+              >
+
+                <div className="event-date">
+                  {new Date(event.event_date).toLocaleDateString(
+                    "en-IN",
+                    {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    }
+                  )}
+                </div>
+
+                <h3>
+                  {event.title}
+                </h3>
+
+                <p>
                   {event.description}
                 </p>
 
-                <p className="mt-4 font-medium">
-                  📅{" "}
-                  {new Date(event.event_date).toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </p>
-
-                <p className="mt-2 text-gray-600">
-                  📍 {event.location}
-                </p>
-
-                <a
+                <Link
                   href={`/events/${event.id}`}
-                  className="mt-5 inline-block rounded-lg bg-black px-5 py-2 text-white"
+                  className="event-card-link"
                 >
-                  View Event
-                </a>
-              </div>
+                  View Event →
+                </Link>
+
+              </article>
+
             ))}
+
           </div>
+
         )}
-      </div>
+
+      </section>
+
     </main>
   );
 }

@@ -1,26 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const supabase = createClient();
-  const router = useRouter();
-
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const supabase = createClient();
 
-      setUser(user);
-    }
-
-    getUser();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      setLoading(false);
+    });
 
     const {
       data: { subscription },
@@ -32,62 +26,47 @@ export default function Navbar() {
   }, []);
 
   async function handleLogout() {
+    const supabase = createClient();
+
     await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+
+    window.location.href = "/";
   }
 
   return (
-    <nav className="border-b bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between p-4">
-        <Link href="/" className="text-xl font-bold">
-          Club Event Portal
-        </Link>
+    <nav className="navbar">
+      <Link href="/" className="nav-brand">
+        <span className="brand-icon">✦</span>
+        DJSCE Club Events
+      </Link>
 
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <Link
-  href="/my-registrations"
-  className="rounded-lg border px-4 py-2 text-sm"
->
-  My Registrations
-</Link>
-              <Link
-                    href="/admin"
-                    className="rounded-lg border px-4 py-2 text-sm"
-              >
-                Admin
-              </Link> 
-              <span className="hidden text-sm text-gray-600 sm:block">
-                {user.email}
-              </span>
+      <div className="nav-links">
+        <Link href="/events">Events</Link>
 
-              <button
-                onClick={handleLogout}
-                className="rounded-lg bg-black px-4 py-2 text-sm text-white hover:bg-gray-800"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-lg border px-4 py-2 text-sm"
-              >
-                Login
-              </Link>
+        {!loading && user && (
+          <Link href="/my-registrations">
+            My Registrations
+          </Link>
+        )}
 
-              <Link
-                href="/signup"
-                className="rounded-lg bg-black px-4 py-2 text-sm text-white"
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
-        </div>
+        {!loading && !user && (
+          <>
+            <Link href="/login">Login</Link>
+
+            <Link href="/signup" className="nav-signup">
+              Sign Up
+            </Link>
+          </>
+        )}
+
+        {!loading && user && (
+          <button
+            onClick={handleLogout}
+            className="nav-logout"
+          >
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );

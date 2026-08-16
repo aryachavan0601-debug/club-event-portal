@@ -2,19 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "../../../lib/supabase/client";
 import { useParams, useRouter } from "next/navigation";
+import { createClient } from "../../../lib/supabase/client";
 
 type Event = {
   id: number;
   title: string;
   description: string;
   event_date: string;
-  location: string;
+  location?: string;
 };
 
 export default function EventDetailsPage() {
-  const supabase = createClient();
   const params = useParams();
   const router = useRouter();
 
@@ -22,10 +21,13 @@ export default function EventDetailsPage() {
   const [user, setUser] = useState<any>(null);
   const [registered, setRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function loadEvent() {
+      const supabase = createClient();
+
       const eventId = Number(params.id);
 
       const { data: eventData } = await supabase
@@ -34,11 +36,12 @@ export default function EventDetailsPage() {
         .eq("id", eventId)
         .single();
 
+      setEvent(eventData);
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      setEvent(eventData);
       setUser(user);
 
       if (user) {
@@ -58,91 +61,163 @@ export default function EventDetailsPage() {
     loadEvent();
   }, [params.id]);
 
-  async function handleRegister() {
+  async function registerForEvent() {
     if (!user) {
       router.push("/login");
       return;
     }
 
+    setRegistering(true);
     setMessage("");
 
-    const { error } = await supabase.from("registrations").insert({
-      user_id: user.id,
-      event_id: event!.id,
-    });
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("registrations")
+      .insert({
+        event_id: Number(params.id),
+        user_id: user.id,
+      });
 
     if (error) {
-      if (error.code === "23505") {
-        setMessage("You are already registered for this event.");
-      } else {
-        setMessage(error.message);
-      }
-      return;
+      setMessage(error.message);
+    } else {
+      setRegistered(true);
+      setMessage("You are successfully registered!");
     }
 
-    setRegistered(true);
-    setMessage("Successfully registered for this event!");
+    setRegistering(false);
   }
 
   if (loading) {
-    return <main className="p-8">Loading...</main>;
+    return (
+      <main className="page-container">
+        <div className="empty-state">
+          Loading event...
+        </div>
+      </main>
+    );
   }
 
   if (!event) {
-    return <main className="p-8">Event not found.</main>;
+    return (
+      <main className="page-container">
+        <div className="empty-state">
+          <h2>Event not found</h2>
+
+          <p>
+            This event may have been removed or does not exist.
+          </p>
+
+          <Link
+            href="/events"
+            className="primary-btn"
+          >
+            Back to Events
+          </Link>
+        </div>
+      </main>
+    );
   }
 
-  return (
-    <main className="min-h-screen bg-gray-100 p-8">
-      <Link
-  href="/"
-  className="mx-auto mb-4 block max-w-3xl text-sm font-medium text-gray-600 hover:text-black"
->
-  ← Back to Events
-</Link>
-      <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-4xl font-bold">{event.title}</h1>
+  const formattedDate = new Date(
+    event.event_date
+  ).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
-        <p className="mt-6 text-lg text-gray-600">
+  return (
+    <main className="page-container">
+
+      <Link
+        href="/events"
+        className="back-link"
+      >
+        ← Back to Events
+      </Link>
+
+      <div className="detail-card">
+
+        <div className="event-date">
+          UPCOMING EVENT
+        </div>
+
+        <h1>
+          {event.title}
+        </h1>
+
+        <p className="detail-description">
           {event.description}
         </p>
 
-        <div className="mt-6 space-y-3">
-          <p>
-            <strong>📅 Date:</strong>{" "}
-            {new Date(event.event_date).toLocaleString("en-IN", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </p>
+        <div className="detail-info">
 
-          <p>
-            <strong>📍 Location:</strong> {event.location}
-          </p>
-        </div>
+          <div className="info-item">
+            <strong>📅 Date & Time</strong>
+            {formattedDate}
+          </div>
 
-        <div className="mt-8">
-          {registered ? (
-            <button
-              disabled
-              className="rounded-lg bg-green-600 px-6 py-3 text-white"
-            >
-              ✓ Registered
-            </button>
-          ) : (
-            <button
-              onClick={handleRegister}
-              className="rounded-lg bg-black px-6 py-3 text-white hover:bg-gray-800"
-            >
-              Register for Event
-            </button>
+          {event.location && (
+            <div className="info-item">
+              <strong>📍 Location</strong>
+              {event.location}
+            </div>
           )}
+
         </div>
+
+        {!user ? (
+
+          <button
+            className="primary-btn"
+            onClick={() => router.push("/login")}
+          >
+            Login to Register →
+          </button>
+
+        ) : registered ? (
+
+          <button
+            className="secondary-btn"
+            disabled
+          >
+            ✓ Registered
+          </button>
+
+        ) : (
+
+          <button
+            className="primary-btn"
+            onClick={registerForEvent}
+            disabled={registering}
+          >
+            {registering
+              ? "Registering..."
+              : "Register for Event →"}
+          </button>
+
+        )}
 
         {message && (
-          <p className="mt-4 text-sm font-medium">{message}</p>
+          <p
+            style={{
+              marginTop: "18px",
+              color: message.includes("success")
+                ? "#16a34a"
+                : "#dc2626",
+              fontWeight: 600,
+            }}
+          >
+            {message}
+          </p>
         )}
+
       </div>
+
     </main>
   );
 }
